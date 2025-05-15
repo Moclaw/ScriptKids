@@ -109,8 +109,8 @@ function add_test_refs() {
   cd - > /dev/null
 }
 
-add_refs "$SOLUTION_NAME.Application" "$SOLUTION_NAME.Domain"
-add_refs "$SOLUTION_NAME.Infrastructure" "$SOLUTION_NAME.Domain" "$SOLUTION_NAME.Application"
+add_refs "$SOLUTION_NAME.Application" "$SOLUTION_NAME.Domain" "$SOLUTION_NAME.Infrastructure"
+add_refs "$SOLUTION_NAME.Infrastructure" "$SOLUTION_NAME.Domain" 
 add_refs "$SOLUTION_NAME.API" "$SOLUTION_NAME.Domain" "$SOLUTION_NAME.Application" "$SOLUTION_NAME.Infrastructure"
 
 if [ "$WITH_TEST" = true ]; then
@@ -144,10 +144,10 @@ function add_test_packages() {
   cd - > /dev/null
 }
 
-add_packages "$SOLUTION_NAME.Domain" MLSolutions.Core MLSolutions.Domain
-add_packages "$SOLUTION_NAME.Application" MLSolutions.Core MLSolutions.Services
-add_packages "$SOLUTION_NAME.Infrastructure" MLSolutions.Core MLSolutions.EfCore MLSolutions.MongoDb MLSolutions.Shard
-add_packages "$SOLUTION_NAME.API" MLSolutions.Core MLSolutions.Shard
+add_packages "$SOLUTION_NAME.Domain" Moclawr.Core Moclawr.Domain
+add_packages "$SOLUTION_NAME.Application" Moclawr.Core Moclawr.Services Moclawr.DotnetCore.Cap Moclawr.Services.Caching
+add_packages "$SOLUTION_NAME.Infrastructure" Moclawr.Core Moclawr.EfCore Moclawr.MongoDb Moclawr.Shard Moclawr.Services.External
+add_packages "$SOLUTION_NAME.API" Moclawr.Core Moclawr.Shard
 
 if [ "$WITH_TEST" = true ]; then
   add_test_packages "$SOLUTION_NAME.Domain.UnitTests" xunit FluentAssertions Moq
