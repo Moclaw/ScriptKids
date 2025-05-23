@@ -2,12 +2,17 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$SolutionName,
 
-  [switch]$WithTest
+  [switch]$WithTest,
+
+  [string]$OutputDir,
+
+  [switch]$AddToExistingSolution
 )
 
 # Define directories
 $srcDir = 'src'
 $testDir = 'test'
+$outDir = 'out'
 
 # Projects
 $projects = @(
@@ -25,48 +30,66 @@ $testProjects = @(
   "$SolutionName.Infrastructure.UnitTests"
 )
 
-# Create root structure
-Write-Host "Creating solution folders: $SolutionName/{src, test}" -ForegroundColor Cyan
-New-Item -ItemType Directory -Path "$SolutionName/$srcDir" -Force | Out-Null
-New-Item -ItemType Directory -Path "$SolutionName/$testDir" -Force | Out-Null
-Set-Location $SolutionName
+# Update root structure creation to use OutputDir if provided
+if ($null -ne $OutputDir) {
+  $SolutionRoot = $OutputDir
+} else {
+  $SolutionRoot = $SolutionName
+}
 
-# Generate .gitignore
-Write-Host "Generating .gitignore" -ForegroundColor Cyan
-@"
-bin/
-obj/
-*.user
-*.suo
-*.log
-.vs/
-.vscode/
-.env
-.env.*
-TestResults/
-coverage/
-*.coverage
-.gitkeep
-appsettings*.json
-"@ | Set-Content '.gitignore'
+# Adjust project paths when adding to an existing solution
+if ($AddToExistingSolution) {
+  $ProjectRoot = Join-Path $SolutionRoot $SolutionName
+  if (-Not (Test-Path $ProjectRoot)) {
+    New-Item -ItemType Directory -Path $ProjectRoot -Force | Out-Null
+  }
+} else {
+  $ProjectRoot = $SolutionRoot
+}
+
+# Create root structure
+Write-Host "Creating solution folders: $ProjectRoot/{src, test}" -ForegroundColor Cyan
+New-Item -ItemType Directory -Path "$ProjectRoot/$srcDir" -Force | Out-Null
+New-Item -ItemType Directory -Path "$ProjectRoot/$testDir" -Force | Out-Null
+Set-Location $ProjectRoot
 
 # Initialize solution file
-Write-Host "Initializing solution: $SolutionName.sln" -ForegroundColor Cyan
-dotnet new sln -n $SolutionName
+if ($AddToExistingSolution) {
+  # Dynamically search for the solution file in the OutputDir
+  $solutionFile = Get-ChildItem -Path $SolutionRoot -Filter "*.sln" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+
+  if ($solutionFile) {
+    Write-Host "Adding projects to existing solution: $($solutionFile.FullName)" -ForegroundColor Green
+  } else {
+    Write-Host "Solution file not found in $SolutionRoot. Creating new solution file." -ForegroundColor Yellow
+    dotnet new sln -n $SolutionName
+    $solutionFile = Get-ChildItem -Path $SolutionRoot -Filter "*.sln" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+  }
+} else {
+  Write-Host "Initializing solution: $SolutionRoot/$SolutionName.sln" -ForegroundColor Cyan
+  dotnet new sln -n $SolutionName
+  $solutionFile = Get-ChildItem -Path $SolutionRoot -Filter "*.sln" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+}
+
+# Ensure solution file is found before proceeding
+if (-Not $solutionFile) {
+  Write-Host "Failed to locate or create a solution file in $SolutionRoot." -ForegroundColor Red
+  exit 1
+}
 
 # Create each project
 foreach ($proj in $projects) {
   $projPath = "$srcDir/$proj"
   if ($proj -like '*.API') {
     Write-Host "Creating WebAPI project: $proj" -ForegroundColor Yellow
-    dotnet new webapi -n $proj -o $projPath
+    dotnet new webapi -n $proj -o "$ProjectRoot/$projPath"
   }
   else {
     Write-Host "Creating class library: $proj" -ForegroundColor Yellow
-    dotnet new classlib -n $proj -o $projPath
+    dotnet new classlib -n $proj -o "$ProjectRoot/$projPath"
   }
   Write-Host "Adding $proj to solution" -ForegroundColor Green
-  dotnet sln add "$projPath/$proj.csproj"
+  dotnet sln "$($solutionFile.FullName)" add "$ProjectRoot/$projPath/$proj.csproj"
 }
 
 # Create test projects if requested
@@ -74,9 +97,9 @@ if ($WithTest) {
   foreach ($testProj in $testProjects) {
     $testPath = "$testDir/$testProj"
     Write-Host "Creating test project: $testProj" -ForegroundColor Yellow
-    dotnet new xunit -n $testProj -o $testPath
+    dotnet new xunit -n $testProj -o "$ProjectRoot/$testPath"
     Write-Host "Adding $testProj to solution" -ForegroundColor Green
-    dotnet sln add "$testPath/$testProj.csproj"
+    dotnet sln "$($solutionFile.FullName)" add "$ProjectRoot/$testPath/$testProj.csproj"
   }
 }
 
@@ -149,6 +172,11 @@ function New-Folders($proj, $folders) {
 
 # Function to remove .gitkeep files from non-empty folders
 function Remove-GitKeepFromNonEmptyFolders($baseDir) {
+  if (-Not (Test-Path $baseDir)) {
+    Write-Host "Directory does not exist: $baseDir" -ForegroundColor Yellow
+    return
+  }
+
   $folders = Get-ChildItem -Path $baseDir -Recurse -Directory
   foreach ($folder in $folders) {
     $gitkeepPath = Join-Path $folder.FullName ".gitkeep"
