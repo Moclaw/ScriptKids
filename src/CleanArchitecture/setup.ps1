@@ -728,6 +728,21 @@ Get-ChildItem -Path $srcDir -Recurse -Filter 'Class1.cs' | Remove-Item -Force
 Write-Host "Removing .gitkeep files from non-empty folders..." -ForegroundColor Cyan
 Remove-GitKeepFromNonEmptyFolders "$SolutionName/$srcDir"
 
+# Copy and customize feature.ps1 to root directory
+Write-Host "Creating feature generation script in project root..." -ForegroundColor Cyan
+$featureScriptPath = Join-Path $templateDir "feature.ps1"
+$featureScriptTarget = Join-Path $ProjectRoot "feature.ps1"
+
+if (Test-Path $featureScriptPath) {
+  $featureContent = Get-Content $featureScriptPath -Raw
+  $updatedFeatureContent = $featureContent -replace 'Sample\.', "$SolutionName." -replace 'sample\.', "$SolutionName." -replace '\bSample\b', "$SolutionName" -replace '\bsample\b', "$SolutionName"
+  Set-Content -Path $featureScriptTarget -Value $updatedFeatureContent -NoNewline
+  Write-Host "Feature script added to project root: $featureScriptTarget" -ForegroundColor Green
+}
+else {
+  Write-Host "Feature script template not found. Skipping." -ForegroundColor Yellow
+}
+
 # Set API layer as startup project
 Write-Host "Setting $SolutionName.API as startup project..." -ForegroundColor Cyan
 $solutionFilePath = "$SolutionName.sln"

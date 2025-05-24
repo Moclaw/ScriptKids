@@ -671,6 +671,32 @@ echo "🗑️ Removed all default Class1.cs files"
 # Remove .gitkeep from non-empty folders
 remove_gitkeep_from_nonempty_folders "$SOLUTION_NAME/$SRC_DIR"
 
+# Copy and customize feature scripts to root directory
+echo "📄 Creating feature generation scripts in project root..."
+
+# Copy PowerShell feature script for Windows users
+FEATURE_PS_PATH="$TEMPLATE_DIR/feature.ps1"
+FEATURE_PS_TARGET="feature.ps1"
+
+if [ -f "$FEATURE_PS_PATH" ]; then
+  cat "$FEATURE_PS_PATH" | sed "s/Sample\./$SOLUTION_NAME./g; s/sample\./$SOLUTION_NAME./g; s/\bSample\b/$SOLUTION_NAME/g; s/\bsample\b/$SOLUTION_NAME/g" > "$FEATURE_PS_TARGET"
+  echo "✅ PowerShell feature script added to project root: $FEATURE_PS_TARGET"
+else
+  echo "⚠️ PowerShell feature script template not found. Skipping."
+fi
+
+# Copy Bash feature script for macOS/Linux users
+FEATURE_SH_PATH="$TEMPLATE_DIR/feature.sh"
+FEATURE_SH_TARGET="feature.sh"
+
+if [ -f "$FEATURE_SH_PATH" ]; then
+  cat "$FEATURE_SH_PATH" | sed "s/Sample\./$SOLUTION_NAME./g; s/sample\./$SOLUTION_NAME./g; s/\bSample\b/$SOLUTION_NAME/g; s/\bsample\b/$SOLUTION_NAME/g" > "$FEATURE_SH_TARGET"
+  chmod +x "$FEATURE_SH_TARGET"  # Make the script executable
+  echo "✅ Bash feature script added to project root: $FEATURE_SH_TARGET"
+else
+  echo "⚠️ Bash feature script template not found. Skipping."
+fi
+
 # Set API layer as startup project
 echo "🚀 Setting $SOLUTION_NAME.API as startup project..."
 VS_DIR=".vs"

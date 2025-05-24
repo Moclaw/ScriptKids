@@ -23,10 +23,8 @@ namespace Sample.Infrastructure
 
             //services.AddDotnetCap(configuration).AddRabbitMq(configuration);
 
-            services.AddKeyedScoped(
-                typeof(ICommandRepository),
+            services.AddKeyedScoped<typeof(ICommandRepository), typeof(CommandDefaultRepository)>(
                 ServiceKeys.CommandRepository,
-                typeof(CommandDefaultRepository)
             );
             services.TryAddKeyedScoped(
                 typeof(IQueryRepository<,>),
