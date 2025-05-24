@@ -14,6 +14,7 @@ _Currently, this script is tailored for **.NET 9**. Future support for additiona
 - Generates a `.gitignore` file suitable for .NET
 - Installs NuGet packages for each project layer automatically
 - Creates a Clean Architecture folder structure with `.gitkeep` placeholders
+- Includes feature generation scripts for easy CQRS implementation
 - Automatically sets the API project as the startup project
 - Compatible with:
   - ✅ Bash for macOS/Linux
@@ -27,6 +28,8 @@ _Currently, this script is tailored for **.NET 9**. Future support for additiona
 YourSolution/
 ├── .gitignore
 ├── YourSolution.sln
+├── feature.ps1 (PowerShell feature generator)
+├── feature.sh (Bash feature generator)
 ├── src/
 │   ├── YourSolution.Domain/
 │   ├── YourSolution.Application/
@@ -194,6 +197,54 @@ The script uses template files located in the `templates` directory. You can cus
 - QueryDefaultRepository.cs
 - ServiceKeys.cs
 - appsettings.Development.json
+- feature.ps1 (PowerShell feature generator)
+- feature.sh (Bash feature generator)
 
 The script will automatically adapt these templates to your solution name.
 
+## 🧩 Feature Generation
+
+The setup scripts also install feature generation tools that help you quickly scaffold new features using the CQRS pattern. The feature generators are available in both PowerShell and Bash versions for cross-platform compatibility.
+
+### 🐧 On macOS/Linux (using `feature.sh`)
+
+```sh
+./feature.sh <FeatureName> <Type> <OperationName>
+```
+
+Example:
+```sh
+./feature.sh User Command Create
+```
+
+### 🪟 On Windows (using `feature.ps1`)
+
+```powershell
+.\feature.ps1 -FeatureName <FeatureName> -Type <Type> -OperationName <OperationName>
+```
+
+Example:
+```powershell
+.\feature.ps1 -FeatureName User -Type Command -OperationName Create
+```
+
+These commands will generate the following structure:
+
+```
+src/YourSolution.Application/Features/User/Commands/Create/
+├── Create.Request.cs
+├── Create.Response.cs
+└── Create.Handler.cs
+```
+
+And corresponding endpoint:
+
+```
+src/YourSolution.API/Endpoints/User/Commands/
+└── Create.Endpoint.cs
+```
+
+Valid types are:
+- `Command`: For write operations (POST, PUT, DELETE)
+- `Query`: For single-item read operations (GET by ID)
+- `Queries`: For collection read operations (GET lists)
