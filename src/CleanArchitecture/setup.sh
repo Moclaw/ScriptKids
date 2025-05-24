@@ -148,8 +148,8 @@ function add_test_packages() {
 
 add_packages "$SOLUTION_NAME.Domain" Moclawr.Core Moclawr.Domain Moclawr.Shared
 add_packages "$SOLUTION_NAME.Application" Moclawr.Core Moclawr.Services Moclawr.Services.Caching Moclawr.Shared
-add_packages "$SOLUTION_NAME.Infrastructure" Moclawr.Core Moclawr.EfCore Moclawr.MongoDb Moclawr.Shared Moclawr.DotNetCore.Cap Moclawr.Services.External Serilog
-add_packages "$SOLUTION_NAME.API" Moclawr.Core Moclawr.Shared Moclawr.MinimalAPI Moclawr.Host Serilog
+add_packages "$SOLUTION_NAME.Infrastructure" Moclawr.Core Moclawr.EfCore Moclawr.MongoDb Moclawr.Shared Moclawr.DotNetCore.Cap Moclawr.Services.External Serilog Microsoft.EntityFrameworkCore.Design Microsoft.EntityFrameworkCore.Tools
+add_packages "$SOLUTION_NAME.API" Moclawr.Core Moclawr.Shared Moclawr.MinimalAPI Moclawr.Host Serilog Microsoft.EntityFrameworkCore.Design Microsoft.EntityFrameworkCore.Tools
 add_packages "$SOLUTION_NAME.Shared" Moclawr.Shared
 
 if [ "$WITH_TEST" = true ]; then

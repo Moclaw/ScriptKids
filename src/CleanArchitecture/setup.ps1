@@ -151,8 +151,8 @@ function Add-TestPackages($testPath, $packages) {
 Write-Host "Installing NuGet packages..." -ForegroundColor Cyan
 Add-Packages "$SolutionName.Domain"        @("Moclawr.Core", "Moclawr.Domain", "Moclawr.Shared")
 Add-Packages "$SolutionName.Application"   @("Moclawr.Core", "Moclawr.Services", "Moclawr.Services.Caching", "Moclawr.Shared")
-Add-Packages "$SolutionName.Infrastructure" @("Moclawr.Core", "Moclawr.EfCore", "Moclawr.MongoDb", "Moclawr.Shared", "Moclawr.DotNetCore.Cap", "Moclawr.Services.External", "Serilog")
-Add-Packages "$SolutionName.API"           @("Moclawr.Core", "Moclawr.Shared", "Moclawr.MinimalAPI", "Moclawr.Host", "Serilog")
+Add-Packages "$SolutionName.Infrastructure" @("Moclawr.Core", "Moclawr.EfCore", "Moclawr.MongoDb", "Moclawr.Shared", "Moclawr.DotNetCore.Cap", "Moclawr.Services.External", "Serilog", "Microsoft.EntityFrameworkCore.Design", "Microsoft.EntityFrameworkCore.Tools")
+Add-Packages "$SolutionName.API"           @("Moclawr.Core", "Moclawr.Shared", "Moclawr.MinimalAPI", "Moclawr.Host", "Serilog", "Microsoft.EntityFrameworkCore.Design", "Microsoft.EntityFrameworkCore.Tools")
 Add-Packages "$SolutionName.Shared"        @("Moclawr.Shared")
 
 if ($WithTest) {
